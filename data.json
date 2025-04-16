@@ -1,0 +1,47 @@
+{
+    "items": [
+      {
+        "name": "Wireless Bluetooth Headphones",
+        "realPrice": 120,
+        "discountedPrice": 85,
+        "rating": 4.6,
+        "imageUrl": "https://picsum.photos/id/310/250/250"
+      },
+      {
+        "name": "Smartwatch Series 6",
+        "realPrice": 300,
+        "discountedPrice": 249,
+        "rating": 4.8,
+        "imageUrl": "https://picsum.photos/id/30/250/250"
+      },
+      {
+        "name": "Vintage Leather Backpack",
+        "realPrice": 150,
+        "discountedPrice": 99,
+        "rating": 4.3,
+        "imageUrl": "https://picsum.photos/id/50/250/250"
+      },
+      {
+        "name": "Ergonomic Office Chair",
+        "realPrice": 220,
+        "discountedPrice": 179,
+        "rating": 4.2,
+        "imageUrl": "https://picsum.photos/id/90/250/250"
+      },
+      {
+        "name": "Gaming Mechanical Keyboard",
+        "realPrice": 95,
+        "discountedPrice": 65,
+        "rating": 4.7,
+        "imageUrl": "https://picsum.photos/id/100/250/250"
+      },
+      {
+        "name": "Ceramic Coffee Mug Set (4 pcs)",
+        "realPrice": 40,
+        "discountedPrice": 25,
+        "rating": 4.5,
+        "imageUrl": "https://picsum.photos/id/120/250/250"
+      }
+    ]
+  }
+  
