@@ -33,9 +33,7 @@
     self.init = async () => {
         self.reset();
         self.buildCSS();
-        await self.loadItems();
-        self.buildHTML();
-        self.setEvents();
+        self.loadItems();
     };
 
     self.reset = () => {
@@ -46,7 +44,7 @@
 
     self.buildCSS = () => {
         const { wrapper, closeBtn, itemRating, nextArrow, prevArrow, roundBtn, 
-            itemWrapper, imageBox, itemAttributes, itemName, itemPriceContainer,itemRealPrice,itemDiscountedPrice } = selectors;
+            itemWrapper, imageBox, itemAttributes, itemName, itemPriceContainer,itemRealPrice,itemDiscountedPrice ,content} = selectors;
 
         const customStyle =
             `${ wrapper } {
@@ -83,25 +81,26 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        ${ content } {
+            overflow-x:hidden;
+        }
         ${ wrapper } ul {
             display:flex;
-            overflow-x: auto;
             scroll-behavior: smooth;
             padding: 0;
             margin: 0;
             list-style: none;
-            gap: 20px;
             width: 100%;
-            max-width: 790px;
+            max-width:790px;
+            gap:20px;
+            transition: transform 0.3s ease;
         }
         ${ wrapper } ul::-webkit-scrollbar {
             display: none;
         }
-
         ${ wrapper } li {
             flex: 0 0 auto;
         }
-
         ${ imageBox }{
             background-color: #EAEFF3;
             background-size: cover;
@@ -109,7 +108,6 @@
             height: 250px;
             width: 250px;
         }
-
         ${ itemAttributes }{
             display: flex;
             flex-direction: column;
@@ -125,36 +123,39 @@
         ${ itemRealPrice }{
             text-decoration: line-through;
         }
-
         ${ wrapper } a {
             text-decoration: none;
             display: inline-block;
             padding: 8px 16px;
         }
-
         ${ wrapper } a:hover {
             background-color: #ddd;
             color: black;
         }
-
         ${ prevArrow } {
             background-color: #f1f1f1;
             color: black;
             left:5px;
             top:225px;
         }
-
         ${ nextArrow } {
             background-color: #f1f1f1;
             color: black;
             right:5px;
             top:225px;
         }
-
        ${ roundBtn } {
             position:absolute;
             z-index:1;
             border-radius: 50%;
+        }
+        @media screen and (max-width:991px){
+            ${ wrapper } {
+                width:80%;
+            }
+            ${ wrapper } ul {
+                max-width:250px;
+            }
         }
         `;
 
@@ -162,7 +163,6 @@
     };
 
     self.buildHTML = () => {
-
         const itemHTML = items.map(item => `
             <li>
                 <div class="${ classes.itemWrapper }">
@@ -171,7 +171,7 @@
                         <div class="${ classes.itemRating }" data-rating="${ item.rating }"></div>
                         <div class="${ classes.itemName }">${ item.name }</div>
                         <div class="${ classes.itemPriceContainer }">
-                            <div class="${ classes.itemRealPrice }}">${ item.realPrice }$</div>
+                            <div class="${ classes.itemRealPrice }">${ item.realPrice }$</div>
                             <div class="${ classes.itemDiscountedPrice }">${ item.discountedPrice }$</div>
                         </div>
                     </div>
@@ -182,9 +182,9 @@
         const outerHtml =
             `|<div class="${ classes.wrapper }">
                 <div class="${ classes.header }">
-                    <a href="javascript:void(0);" class="${ classes.headerLink }">
+                    <div class="${ classes.headerLink }">
                         <div class="${ classes.headerText }">Discounted Products</div>
-                    </a>
+                    </div>
                 </div>
                 <div class="${ classes.content }">
                         <ul>
@@ -202,27 +202,41 @@
     };
 
     self.setEvents = () => {
-
         const ratingElems = document.querySelectorAll(selectors.itemRating);
         ratingElems.forEach((ratingElem) => {
             const ratingValue = parseFloat(ratingElem.getAttribute("data-rating"));
             ratingElem.style.setProperty('--item-rating', ratingValue);
         });
 
-        const prevArrow = $(selectors.prevArrow)
-        const nextArrow = $(selectors.nextArrow)
-        const carousel = $(`${selectors.content} ul`);
+        const prevArrow = $( selectors.prevArrow )
+        const nextArrow = $( selectors.nextArrow )
+        const carousel = document.querySelector(`${ selectors.content } ul`)
+        const allItemCount = carousel.querySelectorAll('li').length;
+        const gap = parseInt(getComputedStyle(carousel).gap);
+        const scrollAmount = document.querySelector(`${ selectors.content } li`).offsetWidth + gap;
 
-        const scrollAmount = 270;
+        let currentOffset = 0;
 
         prevArrow.on('click', (event) => {
             event.preventDefault();
-            carousel.scrollLeft(carousel.scrollLeft() - scrollAmount)
+            if (currentOffset > 0) {
+                currentOffset -= scrollAmount;
+                carousel.style.transform = `translateX(-${ currentOffset }px)`;
+              }
         });
 
+        let showedItemCount;
+        if(window.innerWidth > 991) {
+            showedItemCount = 3;
+        } else {
+            showedItemCount = 1;
+        }
         nextArrow.on('click', (event) => {
             event.preventDefault();
-            carousel.scrollLeft(carousel.scrollLeft() + scrollAmount)
+            if(currentOffset < scrollAmount * (allItemCount - showedItemCount)){
+                currentOffset += scrollAmount;
+                carousel.style.transform = `translateX(-${ currentOffset }px)`
+            }            
         });
 
         $(selectors.closeBtn).on('click', () => {
@@ -230,14 +244,18 @@
         })
     };
 
-    self.loadItems = async () => {
-        try {
-            const response = await fetch('../smart-recommender/data.json');
-            const data = await response.json();
-            items = data.items;
-        } catch (error) {
-            console.error(error);
-        }
+    self.loadItems =  () => {
+        fetch("../smart-recommender/data.json")
+        .then(response => response.json())
+        .then(data => {
+            items = data.items
+            self.buildHTML();
+            self.setEvents();
+        })
+        .catch(error => {
+            console.error(error)
+        });
+      
     };
 
 
